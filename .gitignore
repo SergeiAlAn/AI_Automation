@@ -1,0 +1,24 @@
+# Секреты: в репозиторий попадает только шаблон .env.example
+.env
+.env.*
+!.env.example
+
+# Персональные данные клиентов и результаты работы
+reports/*
+!reports/.gitkeep
+logs/
+*.log
+_preview*
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# IDE и ОС
+.vscode/
+.idea/
+.cursor/
+.DS_Store
+Thumbs.db

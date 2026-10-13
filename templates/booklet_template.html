@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>{{ offer.title or "Предложение по туру" }} — {{ company.name }}</title>
+<style>
+  /* ---------- Страница ---------- */
+  @page {
+    size: A4;
+    margin: 20mm 16mm 20mm 16mm;
+    @top-left {
+      content: "{{ company.name }}";
+      font: 600 8pt "Segoe UI", "DejaVu Sans", Arial, sans-serif;
+      color: #0b4f6c;
+    }
+    @top-right {
+      content: "Персональное предложение";
+      font: 8pt "Segoe UI", "DejaVu Sans", Arial, sans-serif;
+      color: #8a94a6;
+    }
+    @bottom-left {
+      content: "{{ company.phone }}  ·  {{ company.email }}  ·  {{ company.site }}";
+      font: 8pt "Segoe UI", "DejaVu Sans", Arial, sans-serif;
+      color: #8a94a6;
+    }
+    @bottom-right {
+      content: counter(page) " / " counter(pages);
+      font: 8pt "Segoe UI", "DejaVu Sans", Arial, sans-serif;
+      color: #8a94a6;
+    }
+  }
+  @page :first {
+    margin-top: 14mm;
+    @top-left { content: none; }
+    @top-right { content: none; }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "DejaVu Sans", Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.45;
+    color: #1f2a3c;
+    margin: 0;
+  }
+  p { margin: 0 0 6pt; }
+  ul { margin: 0; padding-left: 13pt; }
+  li { margin-bottom: 2pt; }
+  .muted { color: #6b7689; }
+  .tbd { color: #a0a8b6; font-style: italic; }
+  .page { page-break-before: always; }
+
+  h2 {
+    font-size: 13pt;
+    color: #0b4f6c;
+    margin: 14pt 0 8pt;
+    padding-bottom: 3pt;
+    border-bottom: 2px solid #20bf9f;
+    page-break-after: avoid;
+  }
+  h2 .num {
+    display: inline-block;
+    width: 16pt; height: 16pt; line-height: 16pt;
+    margin-right: 6pt;
+    border-radius: 8pt;
+    background: #20bf9f; color: #fff;
+    font-size: 9pt; text-align: center;
+  }
+  h3 { font-size: 10pt; margin: 0 0 4pt; color: #0b4f6c; }
+  .section { page-break-inside: avoid; }
+
+  /* ---------- Обложка ---------- */
+  .brand {
+    font-size: 10pt; font-weight: 600; letter-spacing: 1.5pt;
+    text-transform: uppercase; color: #0b4f6c;
+  }
+  .brand span { color: #20bf9f; }
+  .hero {
+    position: relative;
+    width: 100%; height: 112mm;
+    margin: 8pt 0 0;
+    border-radius: 8pt;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0b4f6c 0%, #20bf9f 100%);
+  }
+  .hero img { width: 100%; height: 112mm; object-fit: cover; display: block; }
+  .hero .caption {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 10pt 14pt;
+    background: rgba(6, 30, 45, .62);
+    color: #fff;
+  }
+  .hero .caption h1 { font-size: 22pt; line-height: 1.15; margin: 0 0 3pt; }
+  .hero .caption .tagline { font-size: 11.5pt; color: #b8f3e6; }
+  .for-client { margin: 8pt 0 6pt; font-size: 9pt; color: #6b7689; }
+  .intro {
+    background: #f6f8fb; border-left: 4px solid #20bf9f;
+    padding: 8pt 10pt; font-size: 10pt;
+  }
+
+  table.facts { width: 100%; border-collapse: separate; border-spacing: 0 6pt; margin-top: 4pt; }
+  table.facts td {
+    width: 33.3%; vertical-align: top;
+    padding: 6pt 8pt;
+    border-left: 3px solid #20bf9f;
+    background: #f6f8fb;
+  }
+  .facts .label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: .5pt; color: #6b7689; }
+  .facts .value { font-size: 9.5pt; font-weight: 600; color: #1f2a3c; }
+
+  /* ---------- Таблицы и карточки ---------- */
+  table.grid { width: 100%; border-collapse: collapse; }
+  table.grid th {
+    background: #eef6f8; color: #0b4f6c; text-align: left;
+    padding: 5pt 6pt; font-size: 9pt;
+  }
+  table.grid td { padding: 5pt 6pt; border-bottom: 1px solid #e6eaf0; vertical-align: top; }
+  .tag {
+    display: inline-block;
+    background: #e3f7f2; color: #0d7a63;
+    border-radius: 10pt; padding: 2pt 8pt;
+    font-size: 9pt;
+  }
+  table.cards { width: 100%; border-collapse: separate; border-spacing: 6pt 0; }
+  table.cards td {
+    vertical-align: top;
+    background: #f6f8fb;
+    border-top: 3px solid #20bf9f;
+    border-radius: 4pt;
+    padding: 8pt;
+  }
+
+  /* ---------- Программа ---------- */
+  table.program { width: 100%; border-collapse: collapse; }
+  table.program td { vertical-align: top; padding: 0 0 8pt; }
+  table.program td.day { width: 22%; padding-right: 8pt; }
+  table.program .badge {
+    display: inline-block;
+    background: #0b4f6c; color: #fff;
+    border-radius: 4pt; padding: 2pt 7pt;
+    font-size: 8.5pt; font-weight: 600;
+  }
+  table.program td.text { border-left: 2px solid #d5efe8; padding-left: 10pt; }
+  table.program tr { page-break-inside: avoid; }
+
+  /* ---------- Стоимость ---------- */
+  .price-box {
+    background: #0b4f6c; color: #fff;
+    border-radius: 6pt; padding: 10pt 14pt;
+  }
+  .price-box .total { font-size: 20pt; font-weight: bold; }
+  .price-box .sub { font-size: 9pt; opacity: .85; }
+
+  .cta {
+    margin-top: 14pt;
+    background: #e3f7f2; border-radius: 6pt;
+    padding: 10pt 14pt;
+    page-break-inside: avoid;
+  }
+  .cta b { color: #0b4f6c; }
+  .disclaimer { margin-top: 8pt; font-size: 8pt; color: #8a94a6; }
+</style>
+</head>
+<body>
+
+{% macro val(value) -%}
+  {% if value not in (none, "", [], {}) %}{{ value }}{% else %}<span class="tbd">Уточняется у менеджера</span>{% endif %}
+{%- endmacro %}
+
+{% macro bullet_list(items) -%}
+  {% if items %}
+    <ul>{% for item in items %}<li>{{ item }}</li>{% endfor %}</ul>
+  {% else %}
+    <span class="tbd">Уточняется у менеджера</span>
+  {% endif %}
+{%- endmacro %}
+
+{% set c = report.client %}
+{% set d = offer.destination %}
+{% set acc = offer.accommodation %}
+{% set p = offer.price %}
+
+{# ======================= СТРАНИЦА 1: ОБЛОЖКА ======================= #}
+<div class="brand">{{ company.name }} <span>·</span> travel</div>
+
+<div class="hero">
+  {% if image_uri %}<img src="{{ image_uri }}" alt="Иллюстрация тура">{% endif %}
+  <div class="caption">
+    <h1>{{ offer.title or "Ваше идеальное путешествие" }}</h1>
+    <div class="tagline">{{ offer.tagline or "Тур, собранный специально для вас" }}</div>
+  </div>
+</div>
+
+<div class="for-client">
+  Персональное предложение для: <b>{{ c.name or "Уважаемый клиент" }}</b> · подготовлено {{ generated_at }}
+</div>
+
+<div class="intro">{{ val(offer.intro) }}</div>
+
+<table class="facts">
+  <tr>
+    <td>
+      <div class="label">Направление</div>
+      <div class="value">{% if d.country %}{{ d.country }}{% if d.region %}, {{ d.region }}{% endif %}{% else %}{{ val(none) }}{% endif %}</div>
+    </td>
+    <td>
+      <div class="label">Даты</div>
+      <div class="value">{{ val(offer.dates) }}</div>
+    </td>
+    <td>
+      <div class="label">Путешественники</div>
+      <div class="value">{{ val(offer.travelers) }}</div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="label">Виды отдыха</div>
+      <div class="value">
+        {% set types = [] %}
+        {% for v in offer.vacation_types_covered %}{% set _ = types.append(v.type if v is mapping else v) %}{% endfor %}
+        {{ val(types | join(", ")) }}
+      </div>
+    </td>
+    <td>
+      <div class="label">Проживание</div>
+      <div class="value">{{ val(acc.name) }}</div>
+    </td>
+    <td>
+      <div class="label">Стоимость</div>
+      <div class="value">{% if p.total %}{{ p.total }} {{ p.currency or "" }}{% else %}{{ val(none) }}{% endif %}</div>
+    </td>
+  </tr>
+</table>
+
+{# ======================= СТРАНИЦА 2: НАПРАВЛЕНИЕ И ПРОГРАММА ======================= #}
+<div class="page">
+
+  <div class="section">
+    <h2><span class="num">1</span>Направление</h2>
+    <p><b>{% if d.country %}{{ d.country }}{% if d.region %}, {{ d.region }}{% endif %}{% else %}{{ val(none) }}{% endif %}</b></p>
+    <p>{{ val(d.why) }}</p>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">2</span>Виды отдыха в туре</h2>
+    {% if offer.vacation_types_covered %}
+    <table class="grid">
+      <tr><th style="width:28%">Вид отдыха</th><th>Как реализован</th></tr>
+      {% for v in offer.vacation_types_covered %}
+        {% if v is mapping %}
+        <tr><td><span class="tag">{{ v.type }}</span></td><td>{{ val(v.how) }}</td></tr>
+        {% else %}
+        <tr><td colspan="2">{{ v }}</td></tr>
+        {% endif %}
+      {% endfor %}
+    </table>
+    {% else %}{{ val(none) }}{% endif %}
+  </div>
+
+  <h2><span class="num">3</span>Программа путешествия</h2>
+  {% if offer.program %}
+  <table class="program">
+    {% for day in offer.program %}
+      {% if day is mapping %}
+      <tr>
+        <td class="day"><span class="badge">{{ day.day or loop.index }}</span></td>
+        <td class="text">{% if day.title %}<h3>{{ day.title }}</h3>{% endif %}{{ day.description or "" }}</td>
+      </tr>
+      {% else %}
+      <tr><td class="day"><span class="badge">{{ loop.index }}</span></td><td class="text">{{ day }}</td></tr>
+      {% endif %}
+    {% endfor %}
+  </table>
+  {% else %}{{ val(none) }}{% endif %}
+</div>
+
+{# ======================= СТРАНИЦА 3: УСЛОВИЯ И СТОИМОСТЬ ======================= #}
+<div class="page">
+
+  <div class="section">
+    <h2><span class="num">4</span>Проживание, перелёт, трансфер</h2>
+    <table class="cards"><tr>
+      <td style="width:34%">
+        <h3>Проживание</h3>
+        <p><b>{{ val(acc.name) }}</b></p>
+        {% if acc.description %}<p>{{ acc.description }}</p>{% endif %}
+        <p class="muted">Питание: {{ val(acc.meal_plan) }}</p>
+      </td>
+      <td style="width:33%"><h3>Перелёт</h3>{{ val(offer.flight) }}</td>
+      <td style="width:33%"><h3>Трансфер</h3>{{ val(offer.transfer) }}</td>
+    </tr></table>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">5</span>Стоимость</h2>
+    <div class="price-box">
+      <div class="total">{% if p.total %}{{ p.total }} {{ p.currency or "" }}{% else %}Рассчитывается индивидуально{% endif %}</div>
+      {% if p.per_person %}<div class="sub">≈ {{ p.per_person }} на человека</div>{% endif %}
+      {% if report.budget.amount %}<div class="sub">Ваш бюджет: {{ report.budget.amount }} {{ report.budget.currency or "" }}</div>{% endif %}
+    </div>
+    <table class="cards" style="margin-top:8pt"><tr>
+      <td style="width:50%"><h3>Входит в стоимость</h3>{{ bullet_list(p.includes) }}</td>
+      <td style="width:50%"><h3>Оплачивается отдельно</h3>{{ bullet_list(p.not_included) }}</td>
+    </tr></table>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">6</span>Учтённые пожелания</h2>
+    {{ bullet_list(offer.extras) }}
+  </div>
+</div>
+
+{# ======================= СТРАНИЦА 4: ЗАПРОС И РЕШЕНИЕ, КОНТАКТЫ ======================= #}
+<div class="page">
+
+  <div class="section">
+    <h2><span class="num">7</span>Ваш запрос — наше решение</h2>
+    {% if offer.requirements_match %}
+    <table class="grid">
+      <tr><th style="width:36%">Ваш запрос</th><th>Решение в туре</th></tr>
+      {% for r in offer.requirements_match %}
+        {% if r is mapping %}
+        <tr><td>{{ val(r.requirement) }}</td><td>{{ val(r.solution) }}</td></tr>
+        {% else %}
+        <tr><td colspan="2">{{ r }}</td></tr>
+        {% endif %}
+      {% endfor %}
+    </table>
+    {% else %}{{ val(none) }}{% endif %}
+  </div>
+
+  <div class="cta">
+    <b>Готовы забронировать или хотите что-то изменить?</b><br>
+    Свяжитесь с нами: {{ company.phone }} · {{ company.email }} · {{ company.site }}
+  </div>
+  <p class="disclaimer">
+    Предложение носит информационный характер и не является публичной офертой.
+    Стоимость и наличие мест уточняются на момент бронирования.
+  </p>
+</div>
+
+</body>
+</html>

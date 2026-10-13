@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Отчёт по запросу клиента</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm 16mm;
+    @bottom-center {
+      content: "Стр. " counter(page) " из " counter(pages);
+      font-family: "Segoe UI", "DejaVu Sans", Arial, sans-serif;
+      font-size: 8pt;
+      color: #8a94a6;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "DejaVu Sans", Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.45;
+    color: #1f2a3c;
+    margin: 0;
+  }
+  h1 { font-size: 22pt; margin: 0 0 4pt; color: #0b4f6c; }
+  h2 {
+    font-size: 12.5pt;
+    color: #0b4f6c;
+    border-bottom: 2px solid #20bf9f;
+    padding-bottom: 3pt;
+    margin: 16pt 0 8pt;
+    page-break-after: avoid;
+  }
+  p { margin: 0 0 6pt; }
+  ul { margin: 0; padding-left: 14pt; }
+  li { margin-bottom: 2pt; }
+  .muted { color: #6b7689; }
+  .header {
+    background: #0b4f6c;
+    color: #fff;
+    padding: 14pt 16pt;
+    border-radius: 6pt;
+  }
+  .header h1 { color: #fff; }
+  .header .meta { font-size: 9pt; opacity: .85; }
+  .section { page-break-inside: avoid; }
+  table.kv { width: 100%; border-collapse: collapse; }
+  table.kv td { padding: 4pt 6pt; vertical-align: top; border-bottom: 1px solid #e6eaf0; }
+  table.kv td.k { width: 34%; color: #6b7689; }
+  table.grid { width: 100%; border-collapse: collapse; }
+  table.grid th {
+    background: #eef6f8; color: #0b4f6c; text-align: left;
+    padding: 5pt 6pt; font-size: 9pt;
+  }
+  table.grid td { padding: 5pt 6pt; border-bottom: 1px solid #e6eaf0; vertical-align: top; }
+  .tag {
+    display: inline-block;
+    background: #e3f7f2; color: #0d7a63;
+    border-radius: 10pt; padding: 2pt 8pt; margin: 0 4pt 4pt 0;
+    font-size: 9pt;
+  }
+  .summary {
+    background: #f6f8fb; border-left: 4px solid #20bf9f;
+    padding: 8pt 10pt; margin-top: 12pt;
+  }
+  .cols { width: 100%; border-collapse: separate; border-spacing: 8pt 0; margin: 0 -8pt; }
+  .cols td { width: 33%; vertical-align: top; background: #f6f8fb; border-radius: 5pt; padding: 8pt; }
+  .cols h3 { font-size: 10pt; margin: 0 0 4pt; color: #0b4f6c; }
+</style>
+</head>
+<body>
+
+{% macro bullet_list(items) -%}
+  {% if items %}
+    <ul>{% for item in items %}<li>{{ item }}</li>{% endfor %}</ul>
+  {% else %}
+    <span class="muted">Не указано</span>
+  {% endif %}
+{%- endmacro %}
+
+{% set c = report.client %}
+<div class="header">
+  <h1>Отчёт по запросу клиента</h1>
+  <div class="meta">{{ c.name or "Клиент без имени" }} · сформирован {{ generated_at }}</div>
+</div>
+
+{% if report.summary %}
+<div class="summary"><b>Резюме:</b> {{ report.summary }}</div>
+{% endif %}
+
+<div class="section">
+  <h2>Информация о клиенте</h2>
+  <table class="kv">
+    <tr><td class="k">Имя</td><td>{{ c.name | or_dash }}</td></tr>
+    <tr><td class="k">Телефон</td><td>{{ c.phone | or_dash }}</td></tr>
+    <tr><td class="k">E-mail</td><td>{{ c.email | or_dash }}</td></tr>
+    <tr><td class="k">Город</td><td>{{ c.city | or_dash }}</td></tr>
+    <tr><td class="k">Связь</td><td>{{ c.preferred_contact | or_dash }}</td></tr>
+    <tr><td class="k">Заметки</td><td>{{ c.notes | or_dash }}</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Виды отдыха</h2>
+  {% if report.vacation_types %}
+    {% for t in report.vacation_types %}<span class="tag">{{ t }}</span>{% endfor %}
+  {% else %}<span class="muted">Не указано</span>{% endif %}
+</div>
+
+<div class="section">
+  <h2>Туристические направления</h2>
+  {% if report.destinations %}
+  <table class="grid">
+    <tr><th>Страна</th><th>Регион / город</th><th>Комментарий</th></tr>
+    {% for d in report.destinations %}
+      {% if d is mapping %}
+      <tr><td>{{ d.country | or_dash }}</td><td>{{ d.region | or_dash }}</td><td>{{ d.comment | or_dash }}</td></tr>
+      {% else %}
+      <tr><td colspan="3">{{ d }}</td></tr>
+      {% endif %}
+    {% endfor %}
+  </table>
+  {% else %}<span class="muted">Не указано</span>{% endif %}
+</div>
+
+<div class="section">
+  <h2>Сроки поездки</h2>
+  {% set td = report.travel_dates %}
+  <table class="kv">
+    <tr><td class="k">Начало</td><td>{{ td.start | or_dash }}</td></tr>
+    <tr><td class="k">Окончание</td><td>{{ td.end | or_dash }}</td></tr>
+    <tr><td class="k">Продолжительность</td><td>{{ td.duration | or_dash }}</td></tr>
+    <tr><td class="k">Гибкость дат</td><td>{{ td.flexibility | or_dash }}</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Состав путешественников</h2>
+  {% set tr = report.travelers %}
+  <table class="kv">
+    <tr><td class="k">Всего человек</td><td>{{ tr.total | or_dash }}</td></tr>
+    <tr><td class="k">Взрослых</td><td>{{ tr.adults | or_dash }}</td></tr>
+    <tr><td class="k">Детей</td><td>{{ tr.children | or_dash }}</td></tr>
+    <tr><td class="k">Возраст детей</td><td>{{ (tr.children_ages | join(", ")) if tr.children_ages else "—" }}</td></tr>
+    <tr><td class="k">Комментарий</td><td>{{ tr.comment | or_dash }}</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Бюджет поездки</h2>
+  {% set b = report.budget %}
+  <table class="kv">
+    <tr><td class="k">Сумма</td><td>{{ b.amount | or_dash }} {{ b.currency or "" }}</td></tr>
+    <tr><td class="k">Охват</td><td>{{ b.scope | or_dash }}</td></tr>
+    <tr><td class="k">Комментарий</td><td>{{ b.comment | or_dash }}</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Пожелания по гостинице, перелёту, трансферу</h2>
+  <table class="cols"><tr>
+    <td><h3>Гостиница</h3>{{ bullet_list(report.hotel_preferences) }}</td>
+    <td><h3>Перелёт</h3>{{ bullet_list(report.flight_preferences) }}</td>
+    <td><h3>Трансфер</h3>{{ bullet_list(report.transfer_preferences) }}</td>
+  </tr></table>
+</div>
+
+<div class="section">
+  <h2>Прочие пожелания</h2>
+  {{ bullet_list(report.other_wishes) }}
+</div>
+
+</body>
+</html>
